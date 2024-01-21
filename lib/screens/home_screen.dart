@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flyer_note/models/note_model.dart';
+import 'package:flyer_note/screens/history_screen.dart';
+import 'package:flyer_note/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,8 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _onNoteTap(NoteModel note) {
-    Navigator.push(
+  Future<void> _onNoteTap(NoteModel note) async {
+    await Navigator.push(
       context,
       PageRouteBuilder(
         barrierColor: Colors.black.withOpacity(0.5),
@@ -216,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
+    setState(() {});
   }
 
   void _onNewNoteTap() {
@@ -355,8 +358,28 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           backgroundColor: Colors.white,
           centerTitle: true,
+          leading: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HistoryScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.history),
+          ),
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.settings)),
           ],
         ),
         body: Scrollbar(
@@ -411,15 +434,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      note.title,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
+                                    if (note.title != "")
+                                      Text(
+                                        note.title,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
                                     Text(
                                       note.text,
                                       maxLines: 7,
@@ -444,6 +468,19 @@ class _HomeScreenState extends State<HomeScreen> {
           splashColor: Colors.black,
           onPressed: _onNewNoteTap,
           child: const Icon(Icons.add),
+        ),
+        // admob
+        bottomNavigationBar: BottomAppBar(
+          surfaceTintColor: Colors.transparent,
+          color: Colors.transparent,
+          shadowColor: Colors.transparent,
+          height: 70,
+          elevation: 0,
+          child: Container(
+            color: Colors.black,
+            width: double.infinity,
+            height: 70,
+          ),
         ),
       ),
     );
