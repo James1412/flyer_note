@@ -1,8 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flyer_note/models/note_model.dart';
-import 'package:flyer_note/screens/settings_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -144,8 +141,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            "Notes",
-            style: TextStyle(fontSize: 30),
+            "History",
           ),
           backgroundColor: Colors.white,
           centerTitle: true,
@@ -155,6 +151,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
           child: ListView(
             controller: _scrollController,
             children: [
+              ListTile(
+                tileColor: Colors.grey.shade200,
+                leading: const Icon(Icons.info_rounded),
+                title: const Text(
+                    "Notes will be permanently deleted after 30 days"),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
