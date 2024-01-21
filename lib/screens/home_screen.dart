@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flyer_note/models/note_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,6 +12,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _titleTextController = TextEditingController();
+  final TextEditingController _bodyTextController = TextEditingController();
 
   final List<Color> colors = [
     Colors.red.shade100,
@@ -21,45 +24,106 @@ class _HomeScreenState extends State<HomeScreen> {
     Colors.purple.shade100,
   ];
 
-  List<String> notes = [
-    "hi",
-    "this is my note",
-    'welcome',
-    'nice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet younice to meet you'
+  List<NoteModel> notes = [
+    NoteModel(
+        title: "null",
+        text:
+            'meet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet you',
+        backgroundColor: Colors.red.shade100,
+        height: 220,
+        width: 185),
   ];
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _titleTextController.dispose();
+    _bodyTextController.dispose();
     super.dispose();
   }
 
-  void _onNoteTap(int index) {
+  void _onNoteTap(NoteModel note) {
     Navigator.push(
       context,
       PageRouteBuilder(
         barrierColor: Colors.black.withOpacity(0.5),
         barrierDismissible: true,
         opaque: false,
-        transitionDuration: const Duration(milliseconds: 500),
-        reverseTransitionDuration: const Duration(milliseconds: 500),
         pageBuilder: (context, animation, secondaryAnimation) {
           return Dialog(
             backgroundColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,
             child: Hero(
+              flightShuttleBuilder: (flightContext, animation, flightDirection,
+                      fromHeroContext, toHeroContext) =>
+                  // Container when animating... (to avoid overflow)
+                  Container(
+                height: note.height,
+                padding: const EdgeInsets.all(5.0),
+                decoration: BoxDecoration(
+                  color: note.backgroundColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
               transitionOnUserGestures: true,
-              tag: index,
+              tag: notes.indexOf(note),
               child: Material(
                 type: MaterialType.transparency,
                 child: Container(
-                  height: 300,
-                  padding: const EdgeInsets.all(5.0),
+                  height: 430,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
+                    color: note.backgroundColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text("Hi"),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 350,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                note.title,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 22),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                note.text,
+                                style: const TextStyle(fontSize: 17),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Edit note button
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.grey.withOpacity(0.3),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.edit,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -67,6 +131,128 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
+  }
+
+  void _onNewNoteTap() {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        barrierColor: Colors.black.withOpacity(0.5),
+        barrierDismissible: true,
+        opaque: false,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          final newBackgroundColor =
+              colors[Random().nextInt(colors.length) + 0];
+          return GestureDetector(
+            onTap: () {
+              if (FocusManager.instance.primaryFocus == null) return;
+              FocusManager.instance.primaryFocus!.unfocus();
+            },
+            child: Dialog(
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  height: 370,
+                  padding: const EdgeInsets.all(10.0),
+                  decoration: BoxDecoration(
+                    color: newBackgroundColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _titleTextController,
+                        decoration: const InputDecoration(
+                          hintText: "Title",
+                          border: InputBorder.none,
+                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextField(
+                        controller: _bodyTextController,
+                        keyboardType: TextInputType.multiline,
+                        decoration: const InputDecoration(
+                          hintText: "Note",
+                          border: OutlineInputBorder(),
+                        ),
+                        minLines: 7,
+                        maxLines: 10,
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                              onTap: () {
+                                _titleTextController.clear();
+                                _bodyTextController.clear();
+                                Navigator.pop(context);
+                              },
+                              child: const SizedBox(
+                                width: 70,
+                                height: 40,
+                                child: Center(
+                                    child: Text(
+                                  "Cancel",
+                                  style: TextStyle(color: Colors.red),
+                                )),
+                              )),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          GestureDetector(
+                            onTap: () => _onNewNoteSaveTap(newBackgroundColor),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              width: 70,
+                              height: 40,
+                              child: const Center(
+                                child: Text(
+                                  "Save",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _onNewNoteSaveTap(Color backgroundColor) {
+    final newNote = NoteModel(
+        title: _titleTextController.text,
+        text: _bodyTextController.text,
+        backgroundColor: backgroundColor,
+        height: Random().nextInt(20) + 200,
+        width: Random().nextInt(15) + 185);
+    setState(() {
+      notes.add(newNote);
+    });
+    _titleTextController.clear();
+    _bodyTextController.clear();
+    Navigator.pop(context);
   }
 
   @override
@@ -78,7 +264,10 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Notes"),
+          title: const Text(
+            "Notes",
+            style: TextStyle(fontSize: 30),
+          ),
           backgroundColor: Colors.white,
           centerTitle: true,
           actions: [
@@ -93,7 +282,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                alignment: WrapAlignment.center,
+                alignment: notes.length <= 1
+                    ? WrapAlignment.start
+                    : WrapAlignment.center,
                 children: [
                   for (var note in notes)
                     Dismissible(
@@ -115,24 +306,43 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       child: GestureDetector(
-                        onTap: () => _onNoteTap(notes.indexOf(note)),
+                        onTap: () => _onNoteTap(note),
                         child: Hero(
                           tag: notes.indexOf(note),
-                          child: Material(
-                            type: MaterialType.transparency,
-                            child: Container(
-                              width: Random().nextInt(20) + 170,
-                              height: Random().nextInt(10) + 180,
-                              padding: EdgeInsets.all(Random().nextInt(20) + 5),
-                              decoration: BoxDecoration(
-                                color:
-                                    colors[Random().nextInt(colors.length) + 0],
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                note,
-                                maxLines: 7,
-                                overflow: TextOverflow.ellipsis,
+                          child: Padding(
+                            padding: notes.length <= 1
+                                ? const EdgeInsets.all(5)
+                                : EdgeInsets.zero,
+                            child: Material(
+                              type: MaterialType.transparency,
+                              child: Container(
+                                width: note.width,
+                                height: note.height,
+                                padding:
+                                    EdgeInsets.all(Random().nextInt(20) + 5),
+                                decoration: BoxDecoration(
+                                  color: note.backgroundColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      note.title,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      note.text,
+                                      maxLines: 7,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -145,7 +355,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          splashColor: Colors.black,
+          onPressed: _onNewNoteTap,
           child: const Icon(Icons.add),
         ),
       ),
