@@ -413,14 +413,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      child: GestureDetector(
-                        onTap: () => _onNoteTap(note),
-                        child: Hero(
-                          tag: notes.indexOf(note),
-                          child: Padding(
-                            padding: notes.length.isOdd
-                                ? const EdgeInsets.only(left: 7)
-                                : EdgeInsets.zero,
+                      child: Padding(
+                        padding: notes.length.isOdd
+                            ? const EdgeInsets.only(left: 7)
+                            : EdgeInsets.zero,
+                        child: GestureDetector(
+                          onTap: () => _onNoteTap(note),
+                          child: Hero(
+                            tag: notes.indexOf(note),
                             child: Material(
                               type: MaterialType.transparency,
                               child: Container(
@@ -430,6 +430,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 decoration: BoxDecoration(
                                   color: note.backgroundColor,
                                   borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 5),
+                                    )
+                                  ],
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
