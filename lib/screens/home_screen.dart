@@ -14,6 +14,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _titleTextController = TextEditingController();
   final TextEditingController _bodyTextController = TextEditingController();
+  final TextEditingController _titleTextEditController =
+      TextEditingController();
+  final TextEditingController _bodyTextEditController = TextEditingController();
+  bool isEditing = false;
 
   final List<Color> colors = [
     Colors.red.shade100,
@@ -39,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _scrollController.dispose();
     _titleTextController.dispose();
     _bodyTextController.dispose();
+    _titleTextEditController.dispose();
+    _bodyTextEditController.dispose();
     super.dispose();
   }
 
@@ -50,84 +56,163 @@ class _HomeScreenState extends State<HomeScreen> {
         barrierDismissible: true,
         opaque: false,
         pageBuilder: (context, animation, secondaryAnimation) {
-          return Dialog(
-            backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            child: Hero(
-              flightShuttleBuilder: (flightContext, animation, flightDirection,
-                      fromHeroContext, toHeroContext) =>
-                  // Container when animating... (to avoid overflow)
-                  Container(
-                height: note.height,
-                padding: const EdgeInsets.all(5.0),
-                decoration: BoxDecoration(
-                  color: note.backgroundColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              transitionOnUserGestures: true,
-              tag: notes.indexOf(note),
-              child: Material(
-                type: MaterialType.transparency,
-                child: Container(
-                  height: 430,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          return StatefulBuilder(builder: (context, setState) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              child: Hero(
+                flightShuttleBuilder: (flightContext, animation,
+                        flightDirection, fromHeroContext, toHeroContext) =>
+                    // Container when animating... (to avoid overflow)
+                    Container(
+                  height: note.height,
+                  padding: const EdgeInsets.all(5.0),
                   decoration: BoxDecoration(
                     color: note.backgroundColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 350,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                transitionOnUserGestures: true,
+                tag: notes.indexOf(note),
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Container(
+                    height: 430,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: note.backgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 350,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                isEditing
+                                    ? TextField(
+                                        controller: _titleTextEditController,
+                                      )
+                                    : Text(
+                                        note.title,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 22),
+                                      ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                isEditing
+                                    ? TextField(
+                                        controller: _bodyTextEditController,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        minLines: 7,
+                                        maxLines: 10,
+                                      )
+                                    : Text(
+                                        note.text,
+                                        style: const TextStyle(fontSize: 17),
+                                      ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(
-                                note.title,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 22),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                note.text,
-                                style: const TextStyle(fontSize: 17),
+                              if (isEditing)
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      isEditing = false;
+                                    });
+                                  },
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(right: 20.0),
+                                    child: SizedBox(
+                                      width: 70,
+                                      height: 40,
+                                      child: Center(
+                                        child: Text(
+                                          "Cancel",
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              // Edit note button
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (!isEditing) {
+                                      _titleTextEditController.text =
+                                          note.title;
+                                      _bodyTextEditController.text = note.text;
+                                    }
+                                    if (isEditing) {
+                                      note.title =
+                                          _titleTextEditController.text;
+                                      note.text = _bodyTextEditController.text;
+                                    }
+                                    isEditing = !isEditing;
+                                  });
+                                },
+                                child: isEditing
+                                    ? Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.black,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        width: 70,
+                                        height: 40,
+                                        child: const Center(
+                                          child: Text(
+                                            "Save",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          color: Colors.grey.withOpacity(0.3),
+                                        ),
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.edit,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                      // Edit note button
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.grey.withOpacity(0.3),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.edit,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
+            );
+          });
         },
       ),
     );
@@ -282,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                alignment: notes.length <= 1
+                alignment: notes.length.isOdd
                     ? WrapAlignment.start
                     : WrapAlignment.center,
                 children: [
@@ -310,16 +395,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Hero(
                           tag: notes.indexOf(note),
                           child: Padding(
-                            padding: notes.length <= 1
-                                ? const EdgeInsets.all(5)
+                            padding: notes.length.isOdd
+                                ? const EdgeInsets.only(left: 7)
                                 : EdgeInsets.zero,
                             child: Material(
                               type: MaterialType.transparency,
                               child: Container(
                                 width: note.width,
                                 height: note.height,
-                                padding:
-                                    EdgeInsets.all(Random().nextInt(20) + 5),
+                                padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   color: note.backgroundColor,
                                   borderRadius: BorderRadius.circular(10),
