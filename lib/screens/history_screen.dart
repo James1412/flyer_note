@@ -16,7 +16,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: "null",
         text:
             'meet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet you',
-        backgroundColor: Colors.red.shade100,
+        backgroundColor: 0xFFFFCDD2,
         height: 220,
         width: 185),
   ];
@@ -48,7 +48,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   height: note.height,
                   padding: const EdgeInsets.all(5.0),
                   decoration: BoxDecoration(
-                    color: note.backgroundColor,
+                    color: Color(note.backgroundColor),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -61,7 +61,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 10, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: note.backgroundColor,
+                      color: Color(note.backgroundColor),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -201,7 +201,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 height: note.height,
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: note.backgroundColor,
+                                  color: Color(note.backgroundColor),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Column(

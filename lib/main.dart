@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flyer_note/databases/note_db.dart';
+import 'package:flyer_note/box_names.dart';
 import 'package:flyer_note/screens/home_screen.dart';
+import 'package:flyer_note/view_models/original_notes_vm.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Hive.openBox(originalBoxName);
+  await Hive.openBox(deletedBoxName);
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => OriginalNoteDatabase()),
-        ChangeNotifierProvider(create: ((context) => DeletedDatabase())),
+        ChangeNotifierProvider(create: (context) => OriginalNotesViewModel()),
       ],
       child: const FlyerNoteApp(),
     ),

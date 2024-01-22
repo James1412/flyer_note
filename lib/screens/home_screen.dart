@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flyer_note/models/note_model.dart';
 import 'package:flyer_note/screens/history_screen.dart';
 import 'package:flyer_note/screens/settings_screen.dart';
+import 'package:flyer_note/view_models/original_notes_vm.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,13 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _bodyTextEditController = TextEditingController();
   bool isEditing = false;
 
-  final List<Color> colors = [
-    Colors.red.shade100,
-    Colors.blue.shade100,
-    Colors.green.shade100,
-    Colors.yellow.shade100,
-    Colors.orange.shade100,
-    Colors.purple.shade100,
+  final List<int> colors = [
+    0xFFFFCDD2,
+    0xFFBBDEFB,
+    0xFFC8E6C9,
+    0xFFFFF9C4,
+    0xFFFFE0B2,
+    0xFFE1BEE7,
+    0xFFB2EBF2,
   ];
 
   List<NoteModel> notes = [
@@ -35,10 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
         title: "null",
         text:
             'meet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet you',
-        backgroundColor: Colors.red.shade100,
+        backgroundColor: 0xFFFFCDD2,
         height: 220,
         width: 185),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -70,12 +78,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: note.height,
                   padding: const EdgeInsets.all(5.0),
                   decoration: BoxDecoration(
-                    color: note.backgroundColor,
+                    color: Color(note.backgroundColor),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 transitionOnUserGestures: true,
-                tag: notes.indexOf(note),
+                tag:
+                    context.watch<OriginalNotesViewModel>().notes.indexOf(note),
                 child: Material(
                   type: MaterialType.transparency,
                   child: Container(
@@ -83,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 10, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: note.backgroundColor,
+                      color: Color(note.backgroundColor),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -103,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         note.title,
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 22),
+                                            fontSize: 25),
                                       ),
                                 const SizedBox(
                                   height: 10,
@@ -119,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       )
                                     : Text(
                                         note.text,
-                                        style: const TextStyle(fontSize: 17),
+                                        style: const TextStyle(fontSize: 20),
                                       ),
                               ],
                             ),
@@ -242,10 +251,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Material(
                 type: MaterialType.transparency,
                 child: Container(
-                  height: 370,
+                  height: 390,
                   padding: const EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
-                    color: newBackgroundColor,
+                    color: Color(newBackgroundColor),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -269,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           border: OutlineInputBorder(),
                         ),
                         minLines: 7,
-                        maxLines: 10,
+                        maxLines: 7,
                       ),
                       const SizedBox(
                         height: 30,
@@ -328,15 +337,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _onNewNoteSaveTap(Color backgroundColor) {
+  void _onNewNoteSaveTap(int backgroundColor) {
     final newNote = NoteModel(
         title: _titleTextController.text,
         text: _bodyTextController.text,
         backgroundColor: backgroundColor,
         height: Random().nextInt(20) + 200,
-        width: Random().nextInt(15) + 185);
+        width: Random().nextInt(15) + MediaQuery.of(context).size.width * 0.42);
     setState(() {
-      notes.add(newNote);
+      context.read<OriginalNotesViewModel>().addNote(newNote);
     });
     _titleTextController.clear();
     _bodyTextController.clear();
@@ -382,23 +391,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.settings)),
           ],
         ),
-        body: Scrollbar(
+        body: RawScrollbar(
+          radius: const Radius.circular(20),
+          thumbColor: Colors.black.withOpacity(0.3),
+          interactive: true,
           controller: _scrollController,
           child: ListView(
             controller: _scrollController,
             children: [
               Wrap(
-                spacing: 10,
+                spacing: 13,
                 runSpacing: 10,
-                alignment: notes.length.isOdd
-                    ? WrapAlignment.start
-                    : WrapAlignment.center,
+                alignment: WrapAlignment.center,
                 children: [
-                  for (var note in notes)
+                  for (var note
+                      in context.watch<OriginalNotesViewModel>().notes)
                     Dismissible(
                       key: UniqueKey(),
                       onDismissed: (direction) {
-                        notes.remove(note);
+                        context.read<OriginalNotesViewModel>().deleteNote(note);
                         setState(() {});
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -406,21 +417,23 @@ class _HomeScreenState extends State<HomeScreen> {
                             action: SnackBarAction(
                               label: "Recover",
                               onPressed: () {
-                                notes.add(note);
-                                setState(() {});
+                                context
+                                    .read<OriginalNotesViewModel>()
+                                    .addNote(note);
                               },
                             ),
                           ),
                         );
                       },
                       child: Padding(
-                        padding: notes.length.isOdd
-                            ? const EdgeInsets.only(left: 7)
-                            : EdgeInsets.zero,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         child: GestureDetector(
                           onTap: () => _onNoteTap(note),
                           child: Hero(
-                            tag: notes.indexOf(note),
+                            tag: context
+                                .watch<OriginalNotesViewModel>()
+                                .notes
+                                .indexOf(note),
                             child: Material(
                               type: MaterialType.transparency,
                               child: Container(
@@ -428,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 height: note.height,
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: note.backgroundColor,
+                                  color: Color(note.backgroundColor),
                                   borderRadius: BorderRadius.circular(10),
                                   boxShadow: [
                                     BoxShadow(
@@ -453,7 +466,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     Text(
                                       note.text,
-                                      maxLines: 7,
+                                      style: const TextStyle(fontSize: 17),
+                                      maxLines: 5,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
