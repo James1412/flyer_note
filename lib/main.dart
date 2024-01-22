@@ -14,6 +14,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => OriginalNotesViewModel()),
+        ChangeNotifierProvider(create: (context) => DeletedNotesViewModel()),
       ],
       child: const FlyerNoteApp(),
     ),

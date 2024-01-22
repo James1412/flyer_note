@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flyer_note/models/note_model.dart';
+import 'package:flyer_note/view_models/original_notes_vm.dart';
+import 'package:provider/provider.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -92,31 +94,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                         Align(
                           alignment: Alignment.bottomCenter,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              // Edit note button
-                              GestureDetector(
-                                  onTap: () {},
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.circular(10),
+                          child: GestureDetector(
+                              onTap: () {
+                                context
+                                    .read<DeletedNotesViewModel>()
+                                    .recoverNote(note, context);
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                width: 70,
+                                height: 40,
+                                child: const Center(
+                                  child: Text(
+                                    "Recover",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    width: 70,
-                                    height: 40,
-                                    child: const Center(
-                                      child: Text(
-                                        "Recover",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  )),
-                            ],
-                          ),
+                                  ),
+                                ),
+                              )),
                         )
                       ],
                     ),
@@ -145,85 +146,66 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           backgroundColor: Colors.white,
           centerTitle: true,
+          actions: [
+            IconButton(
+                onPressed: () {
+                  context.read<DeletedNotesViewModel>().deleteNotes();
+                },
+                icon: const Icon(Icons.delete)),
+          ],
         ),
         body: Scrollbar(
           controller: _scrollController,
           child: ListView(
             controller: _scrollController,
             children: [
-              ListTile(
-                tileColor: Colors.grey.shade200,
-                leading: const Icon(Icons.info_rounded),
-                title: const Text(
-                    "Notes will be permanently deleted after 30 days"),
-              ),
               const SizedBox(
                 height: 10,
               ),
               Wrap(
-                spacing: 10,
+                spacing: 13,
                 runSpacing: 10,
-                alignment: notes.length.isOdd
-                    ? WrapAlignment.start
-                    : WrapAlignment.center,
+                alignment: WrapAlignment.center,
                 children: [
-                  for (var note in notes)
-                    Dismissible(
-                      key: UniqueKey(),
-                      onDismissed: (direction) {
-                        notes.remove(note);
-                        setState(() {});
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text("Deleted the note"),
-                            action: SnackBarAction(
-                              label: "Recover",
-                              onPressed: () {
-                                notes.add(note);
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                      child: GestureDetector(
-                        onTap: () => _onNoteTap(note),
-                        child: Hero(
-                          tag: notes.indexOf(note),
-                          child: Padding(
-                            padding: notes.length.isOdd
-                                ? const EdgeInsets.only(left: 7)
-                                : EdgeInsets.zero,
-                            child: Material(
-                              type: MaterialType.transparency,
-                              child: Container(
-                                width: note.width,
-                                height: note.height,
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Color(note.backgroundColor),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (note.title != "")
-                                      Text(
-                                        note.title,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                  for (var note in context.watch<DeletedNotesViewModel>().notes)
+                    GestureDetector(
+                      onTap: () => _onNoteTap(note),
+                      child: Hero(
+                        tag: context
+                            .watch<DeletedNotesViewModel>()
+                            .notes
+                            .indexOf(note),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: Container(
+                              width: note.width,
+                              height: note.height,
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Color(note.backgroundColor),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (note.title != "")
                                     Text(
-                                      note.text,
-                                      maxLines: 7,
+                                      note.title,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                  ],
-                                ),
+                                  Text(
+                                    note.text,
+                                    maxLines: 7,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
                           ),

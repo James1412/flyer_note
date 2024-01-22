@@ -23,3 +23,13 @@ class OriginalNoteDatabase {
         ];
   }
 }
+
+class DeletedNotesDatabase {
+  void updateNotes(List<Map<String, dynamic>> notes) {
+    originalBox.put(deletedBoxName, notes);
+  }
+
+  List<dynamic> getNotes() {
+    return originalBox.get(deletedBoxName) ?? [];
+  }
+}

@@ -367,28 +367,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           backgroundColor: Colors.white,
           centerTitle: true,
-          leading: IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HistoryScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.history),
-          ),
           actions: [
             IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.settings)),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HistoryScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.history),
+            ),
           ],
         ),
         body: RawScrollbar(
@@ -409,7 +399,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     Dismissible(
                       key: UniqueKey(),
                       onDismissed: (direction) {
-                        context.read<OriginalNotesViewModel>().deleteNote(note);
+                        context
+                            .read<OriginalNotesViewModel>()
+                            .deleteNote(note, context);
                         setState(() {});
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
