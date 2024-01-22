@@ -23,7 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
       TextEditingController();
   final TextEditingController _bodyTextEditController = TextEditingController();
   bool isEditing = false;
-  bool isScreenshot = false;
+  // TODO: Change isScreenshot to false when deploying
+  bool isScreenshot = true;
 
   final List<int> colors = [
     0xFFFFCDD2,
