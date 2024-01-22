@@ -15,7 +15,8 @@ class OriginalNoteDatabase {
         [
           NoteModel(
                   title: "Welcome",
-                  text: "Hi",
+                  text:
+                      "Hi, you can tap to view in larger box and swipe to delete the note",
                   backgroundColor: 0xFFFFCDD2,
                   height: 180,
                   width: 180)

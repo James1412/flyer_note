@@ -29,6 +29,9 @@ class FlyerNoteApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        inputDecorationTheme: const InputDecorationTheme(
+          outlineBorder: BorderSide(color: Colors.black),
+        ),
         textTheme: Typography.blackCupertino,
         scaffoldBackgroundColor: Colors.white,
         snackBarTheme: const SnackBarThemeData(

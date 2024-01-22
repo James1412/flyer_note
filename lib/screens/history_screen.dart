@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flyer_note/admob.dart';
 import 'package:flyer_note/models/note_model.dart';
 import 'package:flyer_note/view_models/original_notes_vm.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  final isScreenshot;
+  const HistoryScreen({super.key, required this.isScreenshot});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -13,20 +16,34 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   final ScrollController _scrollController = ScrollController();
 
-  List<NoteModel> notes = [
-    NoteModel(
-        title: "null",
-        text:
-            'meet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet you',
-        backgroundColor: 0xFFFFCDD2,
-        height: 220,
-        width: 185),
-  ];
+  BannerAd? _ad;
+  @override
+  void initState() {
+    super.initState();
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _ad = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          // Releases an ad resource when it fails to load
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
 
   @override
   void dispose() {
     _scrollController.dispose();
-
+    if (_ad != null) {
+      _ad!.dispose();
+    }
     super.dispose();
   }
 
@@ -55,7 +72,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 ),
                 transitionOnUserGestures: true,
-                tag: notes.indexOf(note),
+                tag: context.watch<DeletedNotesViewModel>().notes.indexOf(note),
                 child: Material(
                   type: MaterialType.transparency,
                   child: Container(
@@ -218,18 +235,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ),
         // admob
-        bottomNavigationBar: BottomAppBar(
-          surfaceTintColor: Colors.transparent,
-          color: Colors.transparent,
-          shadowColor: Colors.transparent,
-          height: 70,
-          elevation: 0,
-          child: Container(
-            color: Colors.black,
-            width: double.infinity,
-            height: 70,
-          ),
-        ),
+        bottomNavigationBar: !widget.isScreenshot
+            ? _ad != null
+                ? BottomAppBar(
+                    surfaceTintColor: Colors.transparent,
+                    color: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    height: 70,
+                    elevation: 0,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 70,
+                      child: AdWidget(ad: _ad!),
+                    ),
+                  )
+                : null
+            : null,
       ),
     );
   }

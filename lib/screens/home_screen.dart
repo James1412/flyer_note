@@ -1,10 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flyer_note/admob.dart';
 import 'package:flyer_note/models/note_model.dart';
 import 'package:flyer_note/screens/history_screen.dart';
-import 'package:flyer_note/screens/settings_screen.dart';
 import 'package:flyer_note/view_models/original_notes_vm.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
       TextEditingController();
   final TextEditingController _bodyTextEditController = TextEditingController();
   bool isEditing = false;
+  bool isScreenshot = false;
 
   final List<int> colors = [
     0xFFFFCDD2,
@@ -33,19 +35,30 @@ class _HomeScreenState extends State<HomeScreen> {
     0xFFB2EBF2,
   ];
 
-  List<NoteModel> notes = [
-    NoteModel(
-        title: "null",
-        text:
-            'meet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet youmeet younice to meet you',
-        backgroundColor: 0xFFFFCDD2,
-        height: 220,
-        width: 185),
-  ];
-
   @override
   void initState() {
     super.initState();
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _ad = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          // Releases an ad resource when it fails to load
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+
+  BannerAd? _ad;
+  Future<InitializationStatus> _initGoogleMobileAds() {
+    return MobileAds.instance.initialize();
   }
 
   @override
@@ -55,6 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _bodyTextController.dispose();
     _titleTextEditController.dispose();
     _bodyTextEditController.dispose();
+    if (_ad != null) {
+      _ad!.dispose();
+    }
     super.dispose();
   }
 
@@ -107,6 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 isEditing
                                     ? TextField(
                                         controller: _titleTextEditController,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                        cursorColor: Colors.black,
                                       )
                                     : Text(
                                         note.title,
@@ -119,10 +138,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 isEditing
                                     ? TextField(
+                                        cursorColor: Colors.black,
                                         controller: _bodyTextEditController,
                                         decoration: const InputDecoration(
-                                          border: OutlineInputBorder(),
-                                        ),
+                                            border: OutlineInputBorder(),
+                                            focusedBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.black))),
                                         minLines: 7,
                                         maxLines: 10,
                                       )
@@ -261,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       TextField(
                         controller: _titleTextController,
+                        cursorColor: Colors.black,
                         decoration: const InputDecoration(
                           hintText: "Title",
                           border: InputBorder.none,
@@ -271,11 +294,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 10,
                       ),
                       TextField(
+                        cursorColor: Colors.black,
                         controller: _bodyTextController,
                         keyboardType: TextInputType.multiline,
                         decoration: const InputDecoration(
                           hintText: "Note",
                           border: OutlineInputBorder(),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                            ),
+                          ),
                         ),
                         minLines: 7,
                         maxLines: 7,
@@ -373,7 +402,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const HistoryScreen(),
+                    builder: (context) => HistoryScreen(
+                      isScreenshot: isScreenshot,
+                    ),
                   ),
                 );
               },
@@ -483,18 +514,22 @@ class _HomeScreenState extends State<HomeScreen> {
           child: const Icon(Icons.add),
         ),
         // admob
-        bottomNavigationBar: BottomAppBar(
-          surfaceTintColor: Colors.transparent,
-          color: Colors.transparent,
-          shadowColor: Colors.transparent,
-          height: 70,
-          elevation: 0,
-          child: Container(
-            color: Colors.black,
-            width: double.infinity,
-            height: 70,
-          ),
-        ),
+        bottomNavigationBar: !isScreenshot
+            ? _ad != null
+                ? BottomAppBar(
+                    surfaceTintColor: Colors.transparent,
+                    color: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    height: 70,
+                    elevation: 0,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 70,
+                      child: AdWidget(ad: _ad!),
+                    ),
+                  )
+                : null
+            : null,
       ),
     );
   }
