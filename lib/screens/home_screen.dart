@@ -25,6 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isEditing = false;
   // TODO: Change isScreenshot to false when deploying
   bool isScreenshot = true;
+  // TODO: Make some change for appstoreconnect
+  // TODO: Change app icon
 
   final List<int> colors = [
     0xFFFFCDD2,
